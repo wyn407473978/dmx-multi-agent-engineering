@@ -56,3 +56,12 @@ project-name/
 ├── README.md
 └── docker-compose.yml  # 本地开发环境
 ```
+
+## 协作文件（由Orchestrator维护）
+
+| 文件 | 位置 | 说明 |
+|------|------|------|
+| requirements-consensus.md | references/ | 需求共识文档 |
+| tech-design.md | references/ | 技术方案文档 |
+| task-assignment.md | references/ | 任务分工清单 |
+| progress-log.md | references/ | 进度日志 |
