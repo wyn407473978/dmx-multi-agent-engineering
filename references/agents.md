@@ -130,12 +130,28 @@
 ## DevOps Agent Prompt
 
 **职责**：
-- Dockerfile
-- docker-compose
+- Dockerfile（前后端项目必须包含）
+- docker-compose.yml（编排前后端服务）
 - CI/CD 配置
 - 部署说明
 - 环境变量
 
+**测试服务器部署规则**（强制）：
+- 测试环境：**120.27.202.25**，用户 `root`
+- 前后端项目**必须使用 Docker 部署**，不得直接部署二进制或源码
+- Backend：构建 Docker 镜像，推送到服务器，运行容器
+- Frontend：构建 Docker 镜像（nginx），推送到服务器，运行容器
+- 使用 `docker-compose` 统一管理前后端服务
+- 部署完成后验证服务可访问
+
+**部署流程**：
+1. 在项目根目录创建 `Dockerfile`（Backend 用多阶段构建，Frontend 用 nginx）
+2. 在项目根目录创建 `docker-compose.yml`（包含 backend、frontend、redis、mysql 等依赖服务）
+3. 构建镜像：`docker build -t <project>-backend:latest ./backend`
+4. 推送镜像到服务器（或使用私有仓库）
+5. 在服务器执行 `docker-compose up -d` 启动服务
+6. 验证：`curl http://<服务器IP>:<端口>/health`
+
 **介入时机**：
-- TECH 阶段提供部署方案
-- DEPLOY 阶段执行部署
+- TECH 阶段提供部署方案（Dockerfile + docker-compose）
+- DEPLOY 阶段执行部署到测试服务器

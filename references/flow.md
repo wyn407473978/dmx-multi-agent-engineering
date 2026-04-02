@@ -29,12 +29,12 @@ INIT → PRD → FRONTEND(Mock) → DEPLOY → USER_CONFIRM → API_DISCUSS → 
 | INIT | 项目需求确认 | - | - |
 | PRD | 产品需求文档 | PM确认 | PM |
 | FRONTEND(Mock) | 前端项目（Mock数据） | 前端自测通过 | Frontend |
-| DEPLOY | 部署预览环境 | 可访问 | DevOps |
+| DEPLOY | 部署预览环境（Docker） | 可访问 | DevOps |
 | USER_CONFIRM | 用户确认原型 | 用户批准 | 用户+PM |
 | API_DISCUSS | 接口设计方案 | Frontend+Backend共识 | Frontend + Backend |
 | BACKEND_DEV | 后端开发 | CI 测试全过 | Backend |
 | INTEGRATE | 前后端联调 | 联调通过 | Frontend + Backend |
-| DEPLOY | 正式部署 | 验收通过 | DevOps |
+| DEPLOY | 正式部署（Docker） | 验收通过 | DevOps |
 | DONE | 交付完成 | - | - |
 
 ### 核心原则：前端即设计稿
@@ -106,8 +106,40 @@ INIT → DISCUSSION → DEV → TEST → DEPLOY → DONE
 | DISCUSSION | 需求讨论 | 核心决策确定 | PM+Backend+Frontend |
 | DEV | 开发 | CI 测试全过 | Backend/Frontend |
 | TEST | 测试报告 | QA 确认 | QA |
-| DEPLOY | 部署验证 | 线上验收 | DevOps |
+| DEPLOY | 部署验证（Docker） | 线上验收 | DevOps |
 | DONE | 交付完成 | - | - |
+
+---
+
+## 测试环境 Docker 部署规范（强制）
+
+**测试服务器**：120.27.202.25（root）
+
+**部署规则**：
+1. 前后端项目**必须使用 Docker 部署**，不得直接部署二进制或源码
+2. Backend：使用多阶段构建 Dockerfile，构建镜像后传送到服务器运行容器
+3. Frontend：使用 nginx Alpine 镜像，构建静态资源后部署
+4. 使用 `docker-compose.yml` 统一编排所有服务（backend、frontend、redis、mysql等）
+5. 部署完成后必须验证服务可访问
+
+**部署流程**：
+```bash
+# 1. 构建镜像
+docker build -t <project>-backend:latest ./backend
+docker build -t <project>-frontend:latest ./frontend
+
+# 2. 在服务器创建项目目录
+ssh root@120.27.202.25 "mkdir -p /opt/docker-projects/<project>"
+
+# 3. 复制 docker-compose.yml 到服务器
+scp docker-compose.yml root@120.27.202.25:/opt/docker-projects/<project>/
+
+# 4. 在服务器拉取镜像并启动
+ssh root@120.27.202.25 "cd /opt/docker-projects/<project> && docker-compose up -d"
+
+# 5. 验证
+curl http://<服务器IP>:<端口>/health
+```
 
 ---
 
@@ -153,7 +185,7 @@ Step 4: Commit
 | 当前阶段 | 推进条件 | 阻塞处理 |
 |---------|---------|---------|
 | FRONTEND(Mock) | 前端自测通过 | Frontend 修复 |
-| DEPLOY | 部署成功可访问 | DevOps 修复 |
+| DEPLOY | 部署成功可访问（Docker验证） | DevOps 修复 |
 | USER_CONFIRM | 用户明确批准 | 收集反馈，修改前端 |
 | API_DISCUSS | 前后端达成接口共识 | 继续讨论 |
 | BACKEND_DEV | CI 测试全绿 | 修复代码 |
@@ -174,4 +206,5 @@ Step 4: Commit
 
 ## 更新日志
 
+- **2026-04-02**：新增「测试环境 Docker 部署规范」。前后端项目部署到测试服务器（120.27.202.25）必须使用 Docker，使用 docker-compose 统一编排。
 - **2026-04-02**：新增「前端先行流程」。前端即设计稿，Mock数据开发，部署给用户确认后再讨论接口，开发后端。适合快速验证和用户体验优先的项目。
