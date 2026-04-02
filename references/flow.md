@@ -1,23 +1,41 @@
 # 状态机流程与 CI Gate
 
-## 完整流程
+## 完整流程（讨论决策优先）
 
 ```
-INIT → PRD → UI → TECH → DEV (TDD) → TEST (CI Gate) → DEPLOY → DONE
+INIT → DISCUSSION → DESIGN → SPLIT → DEVELOP → INTEGRATE → TEST → DEPLOY → DONE
 ```
 
 ### 各阶段说明
 
-| 阶段 | 输出 | 门禁 |
-|------|------|------|
-| INIT | 项目需求确认 | - |
-| PRD | 需求文档 | PM 确认 |
-| UI | UI 设计稿 | UI Agent 自审 |
-| TECH | 技术方案 | 评审通过 |
-| DEV | 可运行代码 | CI 测试全过 |
-| TEST | 测试报告 | QA 确认 |
-| DEPLOY | 部署验证 | 线上验收 |
-| DONE | 交付完成 | - |
+| 阶段 | 输出 | 门禁 | 谁参与 |
+|------|------|------|--------|
+| INIT | 项目需求确认 | - | - |
+| DISCUSSION | 需求共识文档 | 所有Agent确认 | PM+UI+Backend+Frontend |
+| DESIGN | 技术方案文档 | 方案评审通过 | PM+Backend+Frontend |
+| SPLIT | 任务分工清单 | Orchestrator分配 | Orchestrator |
+| DEVELOP | 可运行代码 | CI 测试全过 | Backend/Frontend |
+| INTEGRATE | 集成验证 | 联调通过 | Backend+Frontend |
+| TEST | 测试报告 | QA 确认 | QA |
+| DEPLOY | 部署验证 | 线上验收 | DevOps |
+| DONE | 交付完成 | - | - |
+
+---
+
+## 关键原则：讨论决策不可跳过
+
+```
+⚠️ 重要：DISCUSSION → DESIGN → SPLIT 是强制顺序
+未达成共识，不得进入 DEVELOP 阶段
+```
+
+### 阶段跳过条件
+
+| 阶段 | 可跳过条件 | 替代方案 |
+|------|-----------|---------|
+| DISCUSSION | 用户明确说"不需要讨论" | 直接进入 DESIGN |
+| DESIGN | 用户明确说"不需要方案评审" | 直接进入 SPLIT |
+| SPLIT | - | 不可跳过 |
 
 ---
 
@@ -68,12 +86,21 @@ Step 4: Commit
 
 ```pseudo
 while not DONE:
-    agent_output = call_agent(current_stage)
+    if current_stage == DISCUSSION:
+        ensure_all_agents_participate()
+        if not consensus_reached():
+            current_stage = DISCUSSION_RETRY
+            continue
 
-    if current_stage == BACKEND:
+    if current_stage == DESIGN:
+        if not design_approved():
+            current_stage = DESIGN_RETRY
+            continue
+
+    if current_stage == DEVELOP:
         run_tests()
         if tests_fail:
-            current_stage = BACKEND_RETRY
+            current_stage = DEVELOP_RETRY
             continue
 
     if user_confirmed(agent_output):
@@ -88,9 +115,10 @@ while not DONE:
 
 | 当前阶段 | 推进条件 | 阻塞处理 |
 |---------|---------|---------|
-| PRD | PRD 文档完成 | 返回补充 |
-| UI | UI 设计通过 | 返回修改 |
-| TECH | 技术方案评审通过 | 返回修改 |
-| DEV | CI 测试全绿 | 修复代码 |
+| DISCUSSION | 所有Agent确认需求共识 | 返回讨论 |
+| DESIGN | 方案评审通过 | 返回修改 |
+| SPLIT | 任务分配完成 | Orchestrator重新分配 |
+| DEVELOP | CI 测试全绿 | 修复代码 |
+| INTEGRATE | 前后端联调通过 | 返回开发 |
 | TEST | QA 验收通过 | 补充测试 |
 | DEPLOY | 线上验证通过 | 回滚检查 |
