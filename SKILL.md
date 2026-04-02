@@ -121,9 +121,14 @@ python3 skills/orchestrator-coordinator/scripts/orchestrator-engine.py collect m
 | `collect <project>` | 收集阶段产出 |
 | `spawn <project>` | 生成Agent任务清单 |
 
-## Agent 角色定义
+## Orchestrator 职责（强制规则）
 
-见 `references/agents.md`
+| 规则 | 说明 |
+|------|------|
+| **环境自己搞定** | 开发所需的 Node.js、Go、Python、数据库等环境，Agent 自己下载安装，不问用户 |
+| **不要等用户** | 能自己做的先做，不要停下来问用户 |
+| **遇到问题记录** | 如果环境问题实在解决不了，记录到日志，继续其他任务 |
+| **主动执行** | 拿到 PRD 就开始开发，不用等用户确认每一步 |
 
 ## 状态机流程
 
