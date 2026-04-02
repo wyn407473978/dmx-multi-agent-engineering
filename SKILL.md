@@ -1,37 +1,76 @@
 ---
 name: multi-agent-engineering
-description: Multi-Agent 软件工程系统 - 整合多 Agent 协作、TDD 开发、CI Gate 门禁和多模型路由的完整工程方案。适用于需要自动化软件工程流程的场景，包括：PRD 生成、UI 设计、后端开发（TDD 强制流程）、前端实现、QA 验证、CI/CD 部署。使用时机：(1) 用户请求构建完整项目，(2) 需要多 Agent 协作分工，(3) 要求 TDD 开发流程，(4) 需要 CI 测试门禁。
+description: 多Agent软件工程系统 - 整合多Agent协作、TDD开发、CI Gate门禁、多模型路由和协作决策机制。适用于需要自动化软件工程流程的场景，包括：PRD生成、UI设计、后端开发（TDD强制流程）、前端实现、QA验证、CI/CD部署。核心特点：讨论优先于开发，确保Agent之间先讨论对齐再统一行动。使用时机：(1) 用户请求构建完整项目，(2) 需要多Agent协作分工，(3) 要求TDD开发流程，(4) 需要CI测试门禁，(5) 需要Agent之间先讨论决策再开发。
 ---
 
 # Multi-Agent Engineering System
 
-多 Agent + 多模型 + TDD + CI Gate + 状态机驱动的全自动软件工程系统。
+多 Agent + 多模型 + TDD + CI Gate + 状态机驱动 + **讨论决策优先**的全自动软件工程系统。
+
+## 核心设计理念
+
+**1. 讨论优先于开发**
+所有关键决策必须经过讨论 → 共识 → 确认三步，**避免 Agent 各干各的**。没有统一结论不进入开发阶段。
+
+**2. Agent = Role + Model + Prompt + Tools**
+每个 Agent 独立配置，统一输出格式。
+
+**3. Orchestrator 专职调度**
+Orchestrator 负责流程控制、任务分配、阶段推进，不让 Agent 自己抢任务。
 
 ## 总体架构
 
 ```
-Orchestrator (流程控制 + 路由)
-├── Product Manager → Model A
-├── UI Agent → Model B
-├── Backend (TDD) → Model C
-├── Frontend → Model D
-├── QA Agent → Model E
-└── DevOps Agent → Model F
+Orchestrator (流程控制 + 调度)
+├── Product Manager → 需求拆解、PRD输出
+├── UI Agent → UI设计、页面结构
+├── Backend (TDD) → 后端开发、测试驱动
+├── Frontend → 前端实现
+├── QA Agent → 质量验证、边界测试
+└── DevOps Agent → Docker、CI/CD部署
 ```
 
-## 核心设计原则
-
-**Agent = Role + Model + Prompt + Tools**
-
-每个 Agent 独立配置，统一输出格式。
-
-## 状态机流程
+## 协作流程（讨论决策优先）
 
 ```
-INIT → PRD → UI → TECH → DEV (TDD) → TEST (CI Gate) → DEPLOY → DONE
+INIT
+  ↓
+【阶段1】DISCUSSION — 需求讨论（所有Agent参与）
+  → 统一需求理解
+  → 输出：requirements-consensus.md
+  ↓
+【阶段2】DESIGN — 方案设计（架构师+后端+前端）
+  → 统一技术方案
+  → 输出：tech-design.md
+  ↓
+【阶段3】SPLIT — 任务分工（Orchestrator分配）
+  → 明确各自任务
+  → 输出：task-assignment.md
+  ↓
+【阶段4】DEVELOP — 并行开发（TDD强制）
+  → 按分工执行
+  → 输出：阶段性产出
+  ↓
+【阶段5】INTEGRATE — 集成验证
+  → 合并产出
+  → 验证完整性
+  ↓
+【阶段6】TEST — CI Gate测试
+  ↓
+【阶段7】DEPLOY — 部署
+  ↓
+DONE
 ```
 
-详细流程见 `references/flow.md`
+> 注意：DISCUSSION → DESIGN → SPLIT 是**必须经过的讨论决策阶段**，未达成共识不得跳到 DEVELOP。
+
+## 状态机
+
+```
+INIT → DISCUSSION → DESIGN → SPLIT → DEVELOP → INTEGRATE → TEST → DEPLOY → DONE
+```
+
+详细状态转换规则见 `references/flow.md`
 
 ## Agent 角色定义
 
@@ -43,31 +82,24 @@ INIT → PRD → UI → TECH → DEV (TDD) → TEST (CI Gate) → DEPLOY → DON
 
 ## 项目结构标准
 
-```
-project/
-├── docs/PRD.md, API.md, test-cases.md
-├── design/ui-spec.md
-├── frontend/src/, Dockerfile
-├── backend/src/, tests/, Dockerfile, docker-compose.yml, sql/init.sql
-└── deployment/README.md
-```
+见 `references/project-structure.md`
 
-详细结构见 `references/project-structure.md`
-
-## TDD 强制流程（Backend）
-
-```
-1. 写测试（失败）→ 2. 跑测试（必须失败）→ 3. 写实现 → 4. 跑测试（通过）→ 5. 重构 → 6. 提交
-```
-
-## CI Gate 门禁规则
-
-每次 commit 必须：
-- 自动运行测试
-- 判断结果：PASS → 下一阶段；BLOCKED → 回滚修复
-
-**阻断条件**：测试失败 / 无测试代码 / 测试无法执行 / 覆盖不足
-
-## 调度机制
+## Orchestrator 调度机制
 
 见 `references/schedule.md`
+
+## 讨论决策协议
+
+见 `references/discussion-protocol.md`
+
+## 决策模板
+
+见 `references/decision-templates.md`
+
+## 工作文件模板
+
+协作过程中的产出文件：
+- `references/requirements-consensus.md` - 需求共识文档
+- `references/tech-design.md` - 技术方案文档
+- `references/task-assignment.md` - 任务分工清单
+- `references/progress-log.md` - 进度日志
