@@ -4,15 +4,17 @@
 
 ```json
 {
-  "orchestrator": { "model": "gpt-5" },
-  "product_manager": { "model": "gpt-5" },
-  "ui_designer": { "model": "gpt-5-mini" },
-  "backend": { "model": "gpt-5" },
-  "frontend": { "model": "gpt-5" },
-  "qa": { "model": "gpt-5-mini" },
-  "devops": { "model": "gpt-5-mini" }
+  "orchestrator": { "model": "minimax/MiniMax-M2.7-highspeed" },
+  "product_manager": { "model": "minimax/MiniMax-M2.7-highspeed" },
+  "ui_designer": { "model": "minimax/MiniMax-M2.7-highspeed" },
+  "backend": { "model": "minimax/MiniMax-M2.7-highspeed" },
+  "frontend": { "model": "minimax/MiniMax-M2.7-highspeed" },
+  "qa": { "model": "minimax/MiniMax-M2.7-highspeed" },
+  "devops": { "model": "minimax/MiniMax-M2.7-highspeed" }
 }
 ```
+
+> 当前统一使用 `minimax/MiniMax-M2.7-highspeed`，可根据实际情况调整。
 
 ## 路由原则
 
@@ -29,20 +31,22 @@
 
 ```pseudo
 if task == "complex reasoning":
-    use gpt-5
+    use 高能力模型
 
 if task == "simple formatting":
-    use gpt-5-mini
+    use 中模型
 
 if task == "code generation":
-    use gpt-5
+    use 强代码模型
 
 if task == "review":
-    use mini + second-pass validation
+    use 中模型 + 二次确认
 ```
 
 ## 成本优化建议
 
-- 高成本任务 → gpt-5
-- 轻量任务 → gpt-5-mini
-- 验证类任务 → mini + 二次确认
+- 高成本任务 → 高能力模型
+- 轻量任务 → 中模型
+- 验证类任务 → 中模型 + 二次确认
+
+> 当前统一使用 `MiniMax-M2.7-highspeed`，实际使用时可按需调整。
