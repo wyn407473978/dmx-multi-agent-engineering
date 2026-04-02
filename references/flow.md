@@ -1,147 +1,111 @@
-# 状态机流程与 CI Gate
+# 开发流程
 
-> **共存多种流程**，根据项目类型选择使用
-
----
-
-## 流程选择指南
-
-| 场景 | 选哪个流程 |
-|------|-----------|
-| 快速验证想法、给用户看原型？ | **前端先行流程** |
-| 需求清楚、稳扎稳打？ | **新流程** |
-| 需求模糊、快速试错？ | **旧流程** |
-| Hackathon、内部工具、MVP？ | **前端先行流程** |
-| 对外商业产品？ | **新流程** |
+> 统一开发流程，适用于所有项目
 
 ---
 
-## 流程A：前端先行流程 ⭐（推荐）
-
-**适用：快速验证、用户体验优先、MVP**
+## 标准流程（唯一流程）
 
 ```
-INIT → PRD → FRONTEND(Mock) → DEPLOY → USER_CONFIRM → API_DISCUSS → BACKEND_DEV → INTEGRATE → DEPLOY → DONE
+需求收集 → 需求文档 + UI设计 → 前后端并行开发 + 联调 → 测试 + 代码质量检查 → 完成
 ```
 
 | 阶段 | 输出 | 门禁 | 谁参与 |
 |------|------|------|--------|
-| INIT | 项目需求确认 | - | - |
-| PRD | 产品需求文档 | PM确认 | PM |
-| FRONTEND(Mock) | 前端项目（Mock数据） | 前端自测通过 | Frontend |
-| DEPLOY | 部署预览环境（Docker） | 可访问 | DevOps |
-| USER_CONFIRM | 用户确认原型 | 用户批准 | 用户+PM |
-| API_DISCUSS | 接口设计方案 | Frontend+Backend共识 | Frontend + Backend |
-| BACKEND_DEV | 后端开发 | CI 测试全过 | Backend |
-| INTEGRATE | 前后端联调 | 联调通过 | Frontend + Backend |
-| DEPLOY | 正式部署（Docker） | 验收通过 | DevOps |
-| DONE | 交付完成 | - | - |
-
-### 核心原则：前端即设计稿
-
-```
-前端开发 = 设计稿 + 交互原型
-    ↓
-部署给用户看效果
-    ↓
-用户确认体验
-    ↓
-前后端讨论接口
-    ↓
-后端开发
-    ↓
-联调上线
-```
-
-### 关键规则
-
-1. **前端用 Mock 数据**，完全模拟真实效果
-2. **部署给用户看**，用户确认后再开发后端
-3. **用户不确认，不开发后端**（避免返工）
-4. **接口设计由前后端共同讨论**，达成共识后后端开发
-
-### 并行规则
-```
-PRD完成 → Frontend开发（Mock数据）→ 部署预览 → 用户确认
-                                                      ↓
-                         API讨论 ← Frontend + Backend 共同参与
-                              ↓
-                         Backend开发 → 联调 → 部署
-```
+| 需求收集 | 需求讨论（逐个问题） | 核心功能确定 | PM + 用户 |
+| 需求文档 + UI设计 | PRD文档 + UI设计方案 | 用户确认 | PM + UI Designer |
+| 前后端并行开发 | 可运行代码（前后端独立） | CI 测试全过 | Backend + Frontend |
+| 联调 | 前后端对接完成 | 联调通过 | Backend + Frontend |
+| 测试 + 代码质量 | 测试报告 + 质量报告 | QA 确认 | QA + DevOps |
+| 完成 | 交付 | - | - |
 
 ---
 
-## 流程B：新流程（序贯式）
+## 阶段详细说明
 
-**适用：需求明确、追求质量**
+### 阶段1：需求收集
 
-```
-INIT → DISCUSSION → DESIGN → PRD确认 → DATABASE + DEVELOPMENT → INTEGRATE → TEST → DEPLOY → DONE
-```
+**目标**：明确项目要做什么
 
-| 阶段 | 输出 | 门禁 | 谁参与 |
-|------|------|------|--------|
-| INIT | 项目需求确认 | - | - |
-| DISCUSSION | 需求讨论（逐个问题） | 核心决策确定 | PM+Backend+Frontend |
-| DESIGN | 技术方案（架构、数据库、API） | 技术评审通过 | Backend |
-| **PRD确认** | **完整产品需求文档** | **用户确认通过** | **用户+PM** |
-| DATABASE | 数据库设计 | 评审通过 | Backend |
-| DEVELOPMENT | 可运行代码 | CI 测试全过 | Backend + Frontend |
-| INTEGRATE | 集成验证 | 联调通过 | Backend + Frontend |
-| TEST | 测试报告 | QA 确认 | QA |
-| DEPLOY | 部署验证（Docker） | 线上验收 | DevOps |
-| DONE | 交付完成 | - | - |
+**输出**：核心功能清单
+
+**规则**：
+- 逐个问题询问用户，不要一次性问完
+- 拿到足够信息就继续下一个阶段
+- 环境问题自己解决，不问用户
+
+### 阶段2：需求文档 + UI设计
+
+**目标**：产出 PRD 和 UI 设计稿
+
+**输出**：
+- `projects/<项目名>/PRD.md` - 产品需求文档
+- `projects/<项目名>/UI设计.md` - UI 设计文档
+
+**规则**：
+- 必须等用户确认 PRD 和 UI 设计后才能进入开发
+- 用户确认后才知道进入开发阶段
+
+### 阶段3：前后端并行开发
+
+**目标**：前后端独立开发，互不依赖
+
+**规则**：
+- **环境自己搭建**：后端在本地或测试服务器搭建开发环境，前端在本地搭建
+- **使用 Mock 数据**：前端使用 Mock 数据开发，不依赖后端接口
+- **同步开发**：后端和前端并行开发，互不阻塞
+- **环境搭建规则**：
+  - 本地能搞就在本地搞
+  - 本地搞不了就在测试服务器（120.27.202.25）搭建
+  - 数据库、中间件等服务使用 Docker 部署
+
+### 阶段4：联调
+
+**目标**：前后端对接，接口互通
+
+**规则**：
+- 后端提供真实 API
+- 前端对接真实接口
+- 前后端共同解决联调问题
+- 部署到测试服务器验证
+
+### 阶段5：测试 + 代码质量检查
+
+**目标**：确保代码质量和功能正确
+
+**输出**：
+- 测试报告
+- 代码质量报告
+
+**规则**：
+- 必须运行测试用例
+- 代码质量检查（可使用工具）
+- 修复发现的问题
 
 ---
 
-## 流程C：旧流程（迭代式）
-
-**适用：需求模糊、快速试错**
-
-```
-INIT → DISCUSSION → DEV → TEST → DEPLOY → DONE
-```
-
-| 阶段 | 输出 | 门禁 | 谁参与 |
-|------|------|------|--------|
-| INIT | 项目需求确认 | - | - |
-| DISCUSSION | 需求讨论（逐个问题） | 核心决策确定 | PM+Backend+Frontend |
-| DEV | 开发 | CI 测试全过 | Backend/Frontend |
-| TEST | 测试报告 | QA 确认 | QA |
-| DEPLOY | 部署验证（Docker） | 线上验收 | DevOps |
-| DONE | 交付完成 | - | - |
-
----
-
-## 测试环境 Docker 部署规范（强制）
+## 测试环境 Docker 部署规范
 
 **测试服务器**：120.27.202.25（root）
 
 **部署规则**：
-1. 前后端项目**必须使用 Docker 部署**，不得直接部署二进制或源码
-2. Backend：使用多阶段构建 Dockerfile，构建镜像后传送到服务器运行容器
-3. Frontend：使用 nginx Alpine 镜像，构建静态资源后部署
-4. 使用 `docker-compose.yml` 统一编排所有服务（backend、frontend、redis、mysql等）
+1. 前后端项目**必须使用 Docker 部署**
+2. Backend：使用多阶段构建 Dockerfile
+3. Frontend：使用 nginx Alpine 镜像
+4. 使用 `docker-compose.yml` 统一编排
 5. 部署完成后必须验证服务可访问
 
-**部署流程**：
-```bash
-# 1. 构建镜像
-docker build -t <project>-backend:latest ./backend
-docker build -t <project>-frontend:latest ./frontend
+---
 
-# 2. 在服务器创建项目目录
-ssh root@120.27.202.25 "mkdir -p /opt/docker-projects/<project>"
+## 环境搭建规则（自己搞定）
 
-# 3. 复制 docker-compose.yml 到服务器
-scp docker-compose.yml root@120.27.202.25:/opt/docker-projects/<project>/
-
-# 4. 在服务器拉取镜像并启动
-ssh root@120.27.202.25 "cd /opt/docker-projects/<project> && docker-compose up -d"
-
-# 5. 验证
-curl http://<服务器IP>:<端口>/health
-```
+| 环境 | 搭建位置 | 说明 |
+|------|---------|------|
+| 前端开发环境 | 本地 | Node.js + npm |
+| 后端开发环境 | 本地或测试服务器 | Go + MySQL |
+| 数据库 | 测试服务器 Docker | MySQL/PostgreSQL |
+| Redis | 测试服务器 Docker | 缓存服务 |
+| 前端预览 | 测试服务器 Docker | nginx |
 
 ---
 
@@ -154,59 +118,15 @@ curl http://<服务器IP>:<端口>/health
 2. 判断结果
 
 if PASS:
-  允许进入下一阶段
+  允许提交
 else:
-  阻断流程 + 回滚修复
-```
-
-### 阻断条件（任一满足即阻断）
-
-- 测试失败
-- 没有测试代码
-- 测试无法执行
-- 覆盖率低于阈值（可选）
-
----
-
-## TDD 强制流程（Development 阶段）
-
-```
-Step 1: 写测试（Red）
-        ↓ 跑测试（必须失败）
-Step 2: 写实现（Green）
-        ↓ 跑测试（必须通过）
-Step 3: 重构（Refactor）
-        ↓ 跑测试（必须通过）
-Step 4: Commit
-```
-
----
-
-## 阶段推进规则
-
-| 当前阶段 | 推进条件 | 阻塞处理 |
-|---------|---------|---------|
-| FRONTEND(Mock) | 前端自测通过 | Frontend 修复 |
-| DEPLOY | 部署成功可访问（Docker验证） | DevOps 修复 |
-| USER_CONFIRM | 用户明确批准 | 收集反馈，修改前端 |
-| API_DISCUSS | 前后端达成接口共识 | 继续讨论 |
-| BACKEND_DEV | CI 测试全绿 | 修复代码 |
-| INTEGRATE | 前后端联调通过 | 返回开发 |
-| DEPLOY | 用户验收通过 | 回滚检查 |
-
----
-
-## 一句话总结
-
-```
-快速验证/用户体验优先 → 前端先行流程
-需求清楚 + 质量优先 → 新流程
-需求模糊 + 快速试错 → 旧流程
+  阻断流程 + 修复
 ```
 
 ---
 
 ## 更新日志
 
-- **2026-04-02**：新增「测试环境 Docker 部署规范」。前后端项目部署到测试服务器（120.27.202.25）必须使用 Docker，使用 docker-compose 统一编排。
-- **2026-04-02**：新增「前端先行流程」。前端即设计稿，Mock数据开发，部署给用户确认后再讨论接口，开发后端。适合快速验证和用户体验优先的项目。
+- **2026-04-02**：重写开发流程为统一流程（唯一流程）
+- **2026-04-02**：明确环境自己搭建，不问用户
+- **2026-04-02**：前后端并行开发，使用 Mock 数据
