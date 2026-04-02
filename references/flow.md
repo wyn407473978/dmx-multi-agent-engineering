@@ -76,18 +76,20 @@ PRD完成 → Frontend开发（Mock数据）→ 部署预览 → 用户确认
 **适用：需求明确、追求质量**
 
 ```
-INIT → PRD → DATABASE + DEVELOPMENT → INTEGRATE → TEST → DEPLOY → DONE
+INIT → DISCUSSION → DESIGN → PRD确认 → DATABASE + DEVELOPMENT → INTEGRATE → TEST → DEPLOY → DONE
 ```
 
 | 阶段 | 输出 | 门禁 | 谁参与 |
 |------|------|------|--------|
 | INIT | 项目需求确认 | - | - |
-| PRD | 产品需求文档 | PM确认 | PM |
+| DISCUSSION | 需求讨论（逐个问题） | 核心决策确定 | PM+Backend+Frontend |
+| DESIGN | 技术方案（架构、数据库、API） | 技术评审通过 | Backend |
+| **PRD确认** | **完整产品需求文档** | **用户确认通过** | **用户+PM** |
 | DATABASE | 数据库设计 | 评审通过 | Backend |
 | DEVELOPMENT | 可运行代码 | CI 测试全过 | Backend + Frontend |
 | INTEGRATE | 集成验证 | 联调通过 | Backend + Frontend |
 | TEST | 测试报告 | QA 确认 | QA |
-| DEPLOY | 部署验证 | 线上验收 | DevOps |
+| DEPLOY | 部署验证（Docker） | 线上验收 | DevOps |
 | DONE | 交付完成 | - | - |
 
 ---
@@ -103,7 +105,7 @@ INIT → DISCUSSION → DEV → TEST → DEPLOY → DONE
 | 阶段 | 输出 | 门禁 | 谁参与 |
 |------|------|------|--------|
 | INIT | 项目需求确认 | - | - |
-| DISCUSSION | 需求讨论 | 核心决策确定 | PM+Backend+Frontend |
+| DISCUSSION | 需求讨论（逐个问题） | 核心决策确定 | PM+Backend+Frontend |
 | DEV | 开发 | CI 测试全过 | Backend/Frontend |
 | TEST | 测试报告 | QA 确认 | QA |
 | DEPLOY | 部署验证（Docker） | 线上验收 | DevOps |
