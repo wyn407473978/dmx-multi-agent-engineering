@@ -21,12 +21,26 @@ project-name/
 │   └── README.md
 ├── backend/
 │   ├── config/            # 配置（数据库、环境变量）
-│   ├── models/            # 数据模型（结构体定义）
-│   ├── repository/        # 数据访问层（CRUD操作）
-│   ├── handlers/          # 请求处理（按业务模块分文件）
+│   ├── models/           # 数据模型（按表分文件）
+│   │   ├── store.go
+│   │   ├── user.go
+│   │   ├── product.go
+│   │   └── ...
+│   ├── repository/       # 数据访问层（按表分文件）
+│   │   ├── store.go
+│   │   ├── user.go
+│   │   ├── product.go
+│   │   └── ...
+│   ├── handlers/        # 请求处理（按业务模块分文件）
+│   │   ├── response.go
+│   │   ├── store.go
+│   │   ├── user.go
+│   │   └── ...
 │   ├── routes/           # 路由定义
-│   ├── middleware/        # 中间件
-│   ├── main.go           # 入口文件（只做初始化和启动）
+│   │   └── routes.go
+│   ├── middleware/       # 中间件
+│   │   └── middleware.go
+│   ├── main.go          # 入口文件（只做初始化和启动）
 │   ├── go.mod
 │   └── Dockerfile
 ├── deployment/
@@ -44,53 +58,84 @@ project-name/
 - ❌ `models`、`handlers`、`repository` 混在一起
 - ❌ 业务逻辑写在 `main.go`
 - ❌ 直接在 handler 里操作数据库（必须走 repository 层）
+- ❌ 使用原生 SQL 拼接字符串（必须用 ORM）
 
 **必须**：
-- ✅ 每个业务模块单独文件（如 `supplier.go`、`debt.go`）
+- ✅ 使用 GORM 作为 ORM 框架
+- ✅ 每个数据库表对应一个 model 文件（如 `user.go` 对应 `users` 表）
+- ✅ 每个数据库表对应一个 repository 文件（如 `user.go`）
 - ✅ handler 只做参数解析和响应，数据操作委托 repository
-- ✅ repository 封装所有 SQL 操作
 - ✅ config 封装所有配置读取
+
+### 后端文件命名规范
+
+```
+models/           # 每个文件对应一张表
+├── store.go      # stores 表
+├── user.go       # users 表
+├── product.go    # products 表
+└── order.go      # orders 表
+
+repository/       # 每个文件对应一张表
+├── store.go      # stores 表的 CRUD
+├── user.go       # users 表的 CRUD
+├── product.go    # products 表的 CRUD
+└── order.go      # orders 表的 CRUD
+
+handlers/         # 每个文件对应一个业务模块
+├── response.go   # 统一响应格式
+├── auth.go      # 认证相关
+├── store.go     # 门店管理
+├── user.go      # 用户管理
+├── product.go   # 产品管理
+└── order.go     # 订单管理
+```
 
 ### 后端文件行数约束
 
 | 文件类型 | 最大行数 |
 |----------|----------|
 | handler (单个文件) | 150行 |
-| repository (单个文件) | 200行 |
+| repository (单个文件) | 150行 |
+| model (单个文件) | 100行 |
 | main.go | 50行 |
-| models (单文件) | 200行 |
 
-### 后端命名规范
+### GORM 使用规范
 
-```
-handlers/
-├── response.go      # 统一响应格式
-├── auth.go         # 认证相关
-├── store.go        # 门店
-├── supplier.go     # 供应商
-├── product.go      # 产品（按业务模块分）
-├── order.go       # 订单
-├── user.go        # 用户
-└── debt.go       # 欠款
-```
+```go
+// ✅ 正确：每个表单独 model 文件
+// models/user.go
+type User struct {
+    ID       int64  `json:"id" gorm:"primaryKey"`
+    Username string `json:"username" gorm:"size:50;uniqueIndex"`
+    Password string `json:"-" gorm:"size:100"`
+}
 
-## 各目录职责
+func (User) TableName() string {
+    return "users"
+}
 
-| 目录 | 职责 |
-|------|------|
-| `config/` | 配置加载、环境变量、数据库连接 |
-| `models/` | 数据结构体定义 |
-| `repository/` | 数据库CRUD操作 |
-| `handlers/` | HTTP请求处理、参数校验、响应封装 |
-| `routes/` | 路由注册 |
-| `middleware/` | CORS、认证、日志等中间件 |
+// ✅ 正确：每个表单独 repository 文件
+// repository/user.go
+type UserRepository struct {
+    db *gorm.DB
+}
 
-## 代码流程
+func NewUserRepository(db *gorm.DB) *UserRepository {
+    return &UserRepository{db: db}
+}
 
-```
-请求 → routes → middleware → handlers → repository → database
-                                    ↓
-                              models (数据结构)
+func (r *UserRepository) GetByID(id int64) (*User, error) {
+    var user User
+    result := r.db.First(&user, id)
+    return &user, result.Error
+}
+
+// ❌ 错误：在 handler 直接操作数据库
+func GetUser(c *gin.Context) {
+    db := config.GetDB()
+    db.First(&user, id)  // 禁止！
+}
 ```
 
 ## 前端结构约束
@@ -127,11 +172,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=test
-      - MYSQL_HOST=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=test123
+      - DB_NAME=testdb
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
@@ -144,13 +192,12 @@ services:
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: test123
-    ports:
-      - "3306:3306"
-
-  redis:
-    image: redis:6
-    ports:
-      - "6379:6379"
+      MYSQL_DATABASE: testdb
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 ```
 
 ## 协作文件（由Orchestrator维护）
