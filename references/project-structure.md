@@ -10,53 +10,99 @@ project-name/
 │   └── ui-spec.md          # UI 设计规范
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   └── utils/
+│   │   ├── components/      # 组件（按功能模块分目录）
+│   │   ├── pages/         # 页面组件
+│   │   ├── hooks/         # 自定义Hooks
+│   │   ├── services/     # API调用层
+│   │   └── utils/        # 工具函数
 │   ├── tests/
 │   ├── package.json
 │   ├── Dockerfile
 │   └── README.md
 ├── backend/
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── services/
-│   │   ├── models/
-│   │   └── routes/
-│   ├── tests/
-│   │   ├── unit/
-│   │   └── integration/
-│   ├── sql/
-│   │   └── init.sql
+│   ├── config/            # 配置（数据库、环境变量）
+│   ├── models/            # 数据模型（结构体定义）
+│   ├── repository/        # 数据访问层（CRUD操作）
+│   ├── handlers/          # 请求处理（按业务模块分文件）
+│   ├── routes/           # 路由定义
+│   ├── middleware/        # 中间件
+│   ├── main.go           # 入口文件（只做初始化和启动）
+│   ├── go.mod
+│   └── Dockerfile
+├── deployment/
 │   ├── docker-compose.yml
-│   ├── Dockerfile
-│   ├── README.md
-│   └── go.mod / requirements.txt
-└── deployment/
-    ├── docker-compose.prod.yml
-    ├── nginx.conf
-    └── README.md
+│   └── README.md
+└── .env.test
+```
+
+## ⚠️ 强制约束
+
+### 后端代码结构约束
+
+**禁止**：
+- ❌ 所有代码写在一个文件（如 `handlers.go` 超过200行）
+- ❌ `models`、`handlers`、`repository` 混在一起
+- ❌ 业务逻辑写在 `main.go`
+- ❌ 直接在 handler 里操作数据库（必须走 repository 层）
+
+**必须**：
+- ✅ 每个业务模块单独文件（如 `supplier.go`、`debt.go`）
+- ✅ handler 只做参数解析和响应，数据操作委托 repository
+- ✅ repository 封装所有 SQL 操作
+- ✅ config 封装所有配置读取
+
+### 后端文件行数约束
+
+| 文件类型 | 最大行数 |
+|----------|----------|
+| handler (单个文件) | 150行 |
+| repository (单个文件) | 200行 |
+| main.go | 50行 |
+| models (单文件) | 200行 |
+
+### 后端命名规范
+
+```
+handlers/
+├── response.go      # 统一响应格式
+├── auth.go         # 认证相关
+├── store.go        # 门店
+├── supplier.go     # 供应商
+├── product.go      # 产品（按业务模块分）
+├── order.go       # 订单
+├── user.go        # 用户
+└── debt.go       # 欠款
 ```
 
 ## 各目录职责
 
 | 目录 | 职责 |
 |------|------|
-| `docs/` | 项目文档（PRD、API、测试用例） |
-| `design/` | UI 设计稿和规范 |
-| `frontend/` | 前端代码和配置 |
-| `backend/` | 后端代码、测试、SQL |
-| `deployment/` | 部署配置（生产环境，测试环境不用此目录） |
+| `config/` | 配置加载、环境变量、数据库连接 |
+| `models/` | 数据结构体定义 |
+| `repository/` | 数据库CRUD操作 |
+| `handlers/` | HTTP请求处理、参数校验、响应封装 |
+| `routes/` | 路由注册 |
+| `middleware/` | CORS、认证、日志等中间件 |
 
-## 根目录文件
+## 代码流程
 
 ```
-├── .gitignore
-├── README.md
-├── docker-compose.yml      # 本地开发 + 测试环境（必须）
-└── .env.test               # 测试环境变量（必须）
+请求 → routes → middleware → handlers → repository → database
+                                    ↓
+                              models (数据结构)
 ```
+
+## 前端结构约束
+
+**禁止**：
+- ❌ 所有组件写在一个文件
+- ❌ API 调用分散在各处（必须集中在 services/）
+
+**必须**：
+- ✅ 按功能模块分目录（如 `products/`、`orders/`）
+- ✅ 所有 API 调用在 `services/api.ts`
+- ✅ 公共组件在 `components/common/`
 
 ## 测试环境 Docker 部署文件要求
 
