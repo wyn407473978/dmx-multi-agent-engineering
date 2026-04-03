@@ -10,6 +10,7 @@
 | **任务必须有验收标准** | 每个任务必须定义 AC（Acceptance Criteria） |
 | **每天更新进度** | 在 state.json 和 kanban.md 更新任务状态 |
 | **风险必须上报** | 发现风险及时记录到 risk register |
+| **Lessons 必须记录** | 项目中发现的问题、踩过的坑，记录到 lessons-learned.md |
 
 ## Agent 列表
 
