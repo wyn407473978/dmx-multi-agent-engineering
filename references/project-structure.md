@@ -218,11 +218,30 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: test123
       MYSQL_DATABASE: testdb
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
       test: ["CMD", "mysqladmin", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+```
+
+### ⚠️ MySQL 字符集要求
+
+**必须**：
+- ✅ 数据库字符集：`utf8mb4`
+- ✅ 排序规则：`utf8mb4_unicode_ci`
+- ✅ 连接字符集：`utf8mb4`
+- ✅ GORM DSN 必须包含：`charset=utf8mb4&collation=utf8mb4_unicode_ci`
+
+```go
+// ✅ 正确：GORM 连接必须指定字符集
+dsn := "user:password@tcp(host:3306)/db?charset=utf8mb4&collation=utf8mb4_unicode_ci"
+
+// ❌ 错误：缺少字符集会导致中文乱码
+dsn := "user:password@tcp(host:3306)/db"
 ```
 
 ## 协作文件（由Orchestrator维护）
