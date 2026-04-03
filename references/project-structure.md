@@ -153,6 +153,30 @@ func GetUser(c *gin.Context) {
 
 **测试服务器**：120.27.202.25
 
+### ⚠️ 测试数据要求
+
+**禁止**：
+- ❌ 测试环境使用 Mock 数据
+- ❌ 硬编码假数据在前端或后端
+- ❌ 内存模拟数据库
+
+**必须**：
+- ✅ 所有数据必须来自真实数据库
+- ✅ 数据库必须有初始化数据（不少于 5 条记录）
+- ✅ 提供 SQL 初始化脚本或程序自动初始化
+
+### 测试数据初始化
+
+项目必须包含测试数据初始化脚本：
+
+```
+backend/
+├── sql/
+│   └── init_test_data.sql   # 测试数据 SQL
+└── scripts/
+    └── init_test_data.go   # 或 Go 程序初始化
+```
+
 ### 必须包含的文件
 
 | 文件 | 位置 | 说明 |
@@ -161,6 +185,7 @@ func GetUser(c *gin.Context) {
 | `backend/Dockerfile` | backend/ | 多阶段构建，产出精简镜像 |
 | `frontend/Dockerfile` | frontend/ | nginx Alpine 镜像，运行静态资源 |
 | `.env.test` | 项目根目录 | 测试环境变量（数据库密码、端口等）|
+| `sql/init_test_data.sql` | backend/ | 测试数据初始化 SQL |
 
 ### docker-compose.yml 示例结构
 
