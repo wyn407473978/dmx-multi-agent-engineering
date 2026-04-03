@@ -142,7 +142,7 @@
 4. 使用 `docker-compose.yml` 统一编排
 5. 部署完成后必须验证服务可访问
 
----
+**详细规范见**：`references/docker-deploy.md`
 
 ## 环境搭建规则（自己搞定）
 

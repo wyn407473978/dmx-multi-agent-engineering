@@ -11,6 +11,11 @@ description: 多Agent软件工程系统V2 - 整合多Agent协作、TDD开发、C
 
 相比 V1，V2 新增了**可执行的调度引擎**：
 
+## ⚠️ 部署要求
+
+**测试环境部署必须使用 Docker**，禁止直接在服务器安装运行程序。
+详见 `references/docker-deploy.md`。
+
 | V1（描述性） | V2（可执行） |
 |-------------|-------------|
 | Skill 只定义流程 | `orchestrator-engine.py` 驱动状态机 |
