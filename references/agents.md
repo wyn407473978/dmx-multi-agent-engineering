@@ -7,6 +7,9 @@
 | **环境自己搞定** | Node.js、Go、Python、数据库等开发环境，自己下载安装，不问用户 |
 | **不要停等用户** | 能做的先做，遇到环境问题先记录，继续推进其他任务 |
 | **主动汇报进度** | 完成后更新 state.json 和 PROJECT_LOG.md |
+| **任务必须有验收标准** | 每个任务必须定义 AC（Acceptance Criteria） |
+| **每天更新进度** | 在 state.json 和 kanban.md 更新任务状态 |
+| **风险必须上报** | 发现风险及时记录到 risk register |
 
 ## Agent 列表
 
